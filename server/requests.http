@@ -1,0 +1,10 @@
+### Health check
+GET http://localhost:3000/health
+
+### Ask (stub)
+POST http://localhost:3000/ask
+Content-Type: application/json
+
+{
+  "question": "ping"
+}

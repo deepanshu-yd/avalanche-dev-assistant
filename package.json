@@ -1,15 +1,16 @@
 {
-  "name": "avalanche-dev-assistant",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "avalanche-dev-assistant-monorepo",
+  "private": true,
+  "workspaces": [
+    "server",
+    "extension"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run build -w server && npm run build -w extension",
+    "clean": "rimraf server/dist extension/dist",
+    "dev:server": "npm run dev -w server"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^5.1.0"
+  "devDependencies": {
+    "rimraf": "^6.0.1"
   }
 }

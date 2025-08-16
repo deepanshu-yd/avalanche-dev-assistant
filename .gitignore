@@ -1,1 +1,15 @@
-node_modules
+# Node & build
+node_modules/
+dist/
+*.log
+.nyc_output/
+coverage/
+
+# Env & data
+.env
+server/.env
+data/
+
+# Editor
+.vscode/
+.DS_Store
