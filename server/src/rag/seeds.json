@@ -1,0 +1,19 @@
+{
+  "comment": "Comprehensive Avalanche developer documentation - focused on practical development",
+  "seeds": [
+    "https://build.avax.network/docs",
+    "https://build.avax.network/academy/avalanche-fundamentals",
+    "https://build.avax.network/docs/tools/avalanche-cli",
+    "https://build.avax.network/docs/tooling/avalanche-js",
+    "https://build.avax.network/docs/get-started/evm-subnet",
+    "https://build.avax.network/docs/subnets",
+    "https://build.avax.network/docs/smart-contracts",
+    "https://build.avax.network/docs/api-reference",
+    "https://build.avax.network/docs/nodes",
+    "https://build.avax.network/docs/tooling/hardhat",
+    "https://build.avax.network/docs/tooling/remix",
+    "https://build.avax.network/docs/cross-chain",
+    "https://build.avax.network/academy/dev-101",
+    "https://build.avax.network/docs/get-started/fuji-testnet"
+  ]
+}

@@ -7,8 +7,12 @@
   ],
   "scripts": {
     "build": "npm run build -w server && npm run build -w extension",
-    "clean": "rimraf server/dist extension/dist",
-    "dev:server": "npm run dev -w server"
+    "clean": "rimraf server/dist extension/dist data",
+    "dev:server": "npm run dev -w server",
+    "ingest:fetch": "npm run ingest:fetch -w server",
+    "ingest:local": "npm run ingest:local -w server",
+    "cleanDocs": "npm run cleanDocs -w server",
+    "chunk": "npm run chunk -w server"
   },
   "devDependencies": {
     "rimraf": "^6.0.1"
