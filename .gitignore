@@ -13,3 +13,5 @@ data/
 # Editor
 .vscode/
 .DS_Store
+
+TESTING_GUIDE.md
