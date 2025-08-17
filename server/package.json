@@ -13,6 +13,7 @@
     "chunk": "ts-node src/rag/chunk.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.60.0",
     "axios": "^1.7.2",
     "cheerio": "1.0.0-rc.10",
     "cors": "^2.8.5",

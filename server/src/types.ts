@@ -2,6 +2,20 @@ export interface AskRequest {
   question: string;
 }
 
+export interface DocumentChunk {
+  id: string;
+  url: string;
+  title: string;
+  section?: string;
+  tokens: number;
+  text: string;
+}
+
+export interface SearchResult {
+  chunk: DocumentChunk;
+  similarity: number;
+}
+
 export interface Source {
   title: string;
   url?: string;
@@ -25,4 +39,6 @@ export interface AskResponse {
   answer: string;
   sources: Source[];
   context?: ContextChunk[];
+  provider?: string;
+  tokensUsed?: number;
 }

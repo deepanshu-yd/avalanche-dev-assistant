@@ -14,7 +14,7 @@ const mockEmbed = async (text: string) => {
   // Generate a simple mock embedding based on text content
   const words = text.toLowerCase().split(/\s+/);
   const embedding = new Array(1536).fill(0); // OpenAI embedding dimension
-  
+
   // Create a simple hash-based embedding
   for (let i = 0; i < words.length && i < 100; i++) {
     const word = words[i];
@@ -23,7 +23,7 @@ const mockEmbed = async (text: string) => {
       embedding[charCode % 1536] += 1;
     }
   }
-  
+
   // Normalize
   const norm = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0));
   return {
@@ -34,17 +34,17 @@ const mockEmbed = async (text: string) => {
 
 const mockCosineSimilarity = (a: number[], b: number[]): number => {
   if (a.length !== b.length) return 0;
-  
+
   let dotProduct = 0;
   let normA = 0;
   let normB = 0;
-  
+
   for (let i = 0; i < a.length; i++) {
     dotProduct += a[i] * b[i];
     normA += a[i] * a[i];
     normB += b[i] * b[i];
   }
-  
+
   if (normA === 0 || normB === 0) return 0;
   return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 };
