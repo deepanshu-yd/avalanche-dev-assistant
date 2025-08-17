@@ -1,14 +1,31 @@
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
-import { config } from '../config.js';
-import type { SearchResult } from '../types.js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { config } from '../config';
+import type { SearchResult } from '../types';
 
 // Provider configuration
 const PROVIDER = config.llmProvider;
 
 // Initialize clients
-const openai = config.openaiKey ? new OpenAI({ apiKey: config.openaiKey }) : null;
-const anthropic = config.anthropicKey ? new Anthropic({ apiKey: config.anthropicKey }) : null;
+const openai = config.openaiKey &&
+  config.openaiKey !== "your_openai_key_here" &&
+  config.openaiKey !== "YOUR_OPENAI_KEY_HERE" &&
+  config.openaiKey.startsWith("sk-")
+  ? new OpenAI({ apiKey: config.openaiKey })
+  : null;
+const anthropic = config.anthropicKey &&
+  config.anthropicKey !== "your_claude_key_here" &&
+  config.anthropicKey !== "YOUR_CLAUDE_KEY_HERE" &&
+  config.anthropicKey.startsWith("sk-ant-")
+  ? new Anthropic({ apiKey: config.anthropicKey })
+  : null;
+const genAI = config.geminiKey &&
+  config.geminiKey !== "your_gemini_key_here" &&
+  config.geminiKey !== "YOUR_GEMINI_KEY_HERE" &&
+  config.geminiKey.startsWith("AI")
+  ? new GoogleGenerativeAI(config.geminiKey)
+  : null;
 
 interface LLMResponse {
   answer: string;
@@ -17,9 +34,17 @@ interface LLMResponse {
 }
 
 export async function generateAnswer(query: string, searchResults: SearchResult[]): Promise<LLMResponse> {
+  // Debug logging
+  console.log("LLM Service Debug:");
+  console.log("PROVIDER:", PROVIDER);
+  console.log("genAI available:", genAI !== null);
+  console.log("anthropic available:", anthropic !== null);
+  console.log("openai available:", openai !== null);
+  console.log("config.geminiKey:", config.geminiKey);
+
   // Check if we have any API keys
-  if (!config.openaiKey && !config.anthropicKey) {
-    throw new Error("Missing API key. Please add OPENAI_API_KEY or ANTHROPIC_API_KEY to your .env file");
+  if (!config.openaiKey && !config.anthropicKey && !config.geminiKey) {
+    throw new Error("Missing API key. Please add OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY to your .env file");
   }
 
   // Check if no relevant docs found
@@ -56,14 +81,18 @@ ${context}
 
 Please provide a clear, developer-focused answer based on the documentation above.`;
 
-  // Generate response based on provider
-  if (PROVIDER === "anthropic" && anthropic) {
+  // Generate response based on provider (prioritize Gemini as requested)
+  if (PROVIDER === "gemini" && genAI) {
+    return await generateGeminiResponse(systemPrompt, userPrompt);
+  } else if (PROVIDER === "anthropic" && anthropic) {
     return await generateAnthropicResponse(systemPrompt, userPrompt);
   } else if (PROVIDER === "openai" && openai) {
     return await generateOpenAIResponse(systemPrompt, userPrompt);
   } else {
-    // Fallback to available provider
-    if (openai) {
+    // Fallback to available provider (prioritize Gemini)
+    if (genAI) {
+      return await generateGeminiResponse(systemPrompt, userPrompt);
+    } else if (openai) {
       return await generateOpenAIResponse(systemPrompt, userPrompt);
     } else if (anthropic) {
       return await generateAnthropicResponse(systemPrompt, userPrompt);
@@ -133,5 +162,50 @@ async function generateAnthropicResponse(systemPrompt: string, userPrompt: strin
   } catch (error: any) {
     console.error("Anthropic API error:", error);
     throw new Error(`Anthropic API error: ${error.message}`);
+  }
+}
+
+async function generateGeminiResponse(systemPrompt: string, userPrompt: string): Promise<LLMResponse> {
+  if (!genAI) {
+    throw new Error("Gemini client not initialized. Check your GEMINI_API_KEY in .env");
+  }
+
+  try {
+    // Get the generative model
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+    // Combine system and user prompts for Gemini
+    const fullPrompt = `${systemPrompt}\n\n${userPrompt}`;
+
+    // Generate response
+    const result = await model.generateContent({
+      contents: [{
+        role: "user",
+        parts: [{
+          text: fullPrompt
+        }]
+      }],
+      generationConfig: {
+        temperature: 0.1,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 1000,
+      }
+    });
+
+    const response = await result.response;
+    const answer = response.text() || "I apologize, but I couldn't generate a response.";
+
+    // Gemini doesn't provide token usage in the same way, so we estimate
+    const tokensUsed = Math.floor((fullPrompt.length + answer.length) / 4); // Rough token estimation
+
+    return {
+      answer,
+      tokensUsed,
+      provider: "gemini"
+    };
+  } catch (error: any) {
+    console.error("Gemini API error:", error);
+    throw new Error(`Gemini API error: ${error.message}`);
   }
 }

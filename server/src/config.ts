@@ -4,9 +4,10 @@ dotenv.config();
 export const config = {
   port: Number(process.env.PORT || 3001),
   corsOrigin: process.env.CORS_ORIGIN || "*",
-  llmProvider: (process.env.LLM_PROVIDER || "openai") as "openai" | "anthropic",
+  llmProvider: (process.env.LLM_PROVIDER || "gemini") as "openai" | "anthropic" | "gemini",
   openaiKey: process.env.OPENAI_API_KEY || "",
-  anthropicKey: process.env.ANTHROPIC_API_KEY || ""
+  anthropicKey: process.env.ANTHROPIC_API_KEY || "",
+  geminiKey: process.env.GEMINI_API_KEY || ""
 };
 
 /**
@@ -15,5 +16,6 @@ export const config = {
  * 2) Add your actual API keys:
  *    OPENAI_API_KEY=sk-...
  *    ANTHROPIC_API_KEY=sk-ant-...
- * 3) Choose your preferred LLM_PROVIDER (openai or anthropic)
+ *    GEMINI_API_KEY=your-gemini-key...
+ * 3) Choose your preferred LLM_PROVIDER (openai, anthropic, or gemini)
  */

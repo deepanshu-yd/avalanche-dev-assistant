@@ -22,7 +22,7 @@
       "properties": {
         "avalancheAssistant.serverUrl": {
           "type": "string",
-          "default": "http://localhost:3000",
+          "default": "http://localhost:3001",
           "description": "Base URL of the local Avalanche Assistant server."
         }
       }

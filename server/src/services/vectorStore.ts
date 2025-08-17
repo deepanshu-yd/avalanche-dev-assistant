@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { embed, cosineSimilarity } from './embedder.js';
+import { embed, cosineSimilarity } from './embedder';
 
 interface ChunkData {
   id: string;
@@ -64,10 +64,19 @@ class VectorStore {
       await this.initialize();
     }
 
-    // Generate embedding for the query
-    const queryResult = await embed(query);
-    const queryEmbedding = queryResult.embedding;
+    // Try to generate embedding for the query
+    try {
+      const queryResult = await embed(query);
+      const queryEmbedding = queryResult.embedding;
 
+      return this.performSemanticSearch(queryEmbedding, topK);
+    } catch (error) {
+      console.log('Cannot perform semantic search, falling back to simple text matching');
+      return this.performTextSearch(query, topK);
+    }
+  }
+
+  private performSemanticSearch(queryEmbedding: number[], topK: number): SearchResult[] {
     // Calculate similarities
     const results: SearchResult[] = [];
 
@@ -84,6 +93,44 @@ class VectorStore {
             text: chunk.text
           },
           similarity
+        });
+      }
+    }
+
+    // Sort by similarity (highest first) and return top K
+    return results
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, topK);
+  }
+
+  private performTextSearch(query: string, topK: number): SearchResult[] {
+    const queryWords = query.toLowerCase().split(' ').filter(word => word.length > 2);
+    const results: SearchResult[] = [];
+
+    for (const chunk of this.chunks) {
+      const content = chunk.text.toLowerCase();
+      let score = 0;
+
+      // Simple text matching score based on word frequency
+      for (const word of queryWords) {
+        const regex = new RegExp(word, 'gi');
+        const matches = content.match(regex);
+        if (matches) {
+          score += matches.length;
+        }
+      }
+
+      if (score > 0) {
+        results.push({
+          chunk: {
+            id: chunk.id,
+            url: chunk.url,
+            title: chunk.title,
+            section: chunk.section,
+            tokens: chunk.tokens,
+            text: chunk.text
+          },
+          similarity: score / (content.length / 1000), // Normalize by content length
         });
       }
     }

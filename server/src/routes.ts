@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
-import type { AskResponse } from "./types";
-import { vectorStore } from "./services/vectorStore.js";
-import { generateAnswer } from "./services/llmService.js";
+import type { AskResponse, SearchResult } from "./types";
+import { vectorStore } from "./services/vectorStore";
+import { generateAnswer } from "./services/llmService";
 
 const router = Router();
 
@@ -30,7 +30,7 @@ router.post("/ask", async (req, res) => {
     const llmResponse = await generateAnswer(question, searchResults);
 
     // Step 3: Convert search results to sources format
-    const sources = searchResults.map(result => ({
+    const sources = searchResults.map((result: SearchResult) => ({
       url: result.chunk.url,
       title: result.chunk.title,
       section: result.chunk.section,
@@ -38,7 +38,7 @@ router.post("/ask", async (req, res) => {
     }));
 
     // Step 4: Prepare context chunks for response
-    const context = searchResults.map(result => ({
+    const context = searchResults.map((result: SearchResult) => ({
       text: result.chunk.text,
       metadata: {
         id: result.chunk.id,
